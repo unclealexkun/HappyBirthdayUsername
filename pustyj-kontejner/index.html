@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ПУСТОЙ КОНТЕЙНЕР — детектив 1998</title>
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<!-- Экран заставки -->
+<div id="screen-title" class="screen active">
+  <div class="title-vignette"></div>
+  <div class="title-inner">
+    <div class="title-year">Заречье · порт · ноябрь 1998</div>
+    <h1 class="game-title">ПУСТОЙ<br><span class="accent">КОНТЕЙНЕР</span></h1>
+    <div class="title-sub">реалистичный детектив-RPG · одна линия 7–10 минут</div>
+    <div class="title-card">
+      <img id="img-voronov-title" class="card-portrait" alt="">
+      <div class="card-text">
+        <b>ст. лейтенант Илья Воронов</b><br>
+        районный сыскарь. Устал, но ещё верит в процедуру.<br>
+        <span class="dim">У вас 3 часа до утра. Начальство хочет «бытовой грабёж» и виновного.</span>
+      </div>
+    </div>
+    <button id="btn-start" class="btn btn-primary">Начать смену</button>
+    <div class="title-hint">Мышь / клавиши 1–4 · Enter — далее · Esc — меню</div>
+  </div>
+</div>
+
+<!-- Основной экран новеллы -->
+<div id="screen-game" class="screen">
+  <div id="bg-layer" class="bg-layer"></div>
+  <div id="bg-layer-next" class="bg-layer next"></div>
+  <div class="scene-fog"></div>
+  <div class="rain" id="rain"></div>
+
+  <!-- HUD -->
+  <header class="hud">
+    <div class="hud-left">
+      <div class="hud-location" id="hud-location">—</div>
+      <div class="hud-chapter" id="hud-chapter">Сцена 1</div>
+    </div>
+    <div class="hud-center">
+      <div class="clock-wrap" title="Осталось времени на следствие">
+        <svg viewBox="0 0 44 44" class="clock-svg">
+          <circle cx="22" cy="22" r="19" class="clock-ring"/>
+          <g id="clock-pips"></g>
+        </svg>
+        <div class="clock-label"><span id="hours-left">3</span>&nbsp;ч</div>
+      </div>
+    </div>
+    <div class="hud-right">
+      <div class="stat" data-stat="ob" title="Наблюдательность"><span class="stat-key">НБ</span><span class="stat-val" id="st-ob">2</span></div>
+      <div class="stat" data-stat="em" title="Эмпатия"><span class="stat-key">ЭМ</span><span class="stat-val" id="st-em">2</span></div>
+      <div class="stat" data-stat="pr" title="Давление"><span class="stat-key">ДВ</span><span class="stat-val" id="st-pr">2</span></div>
+      <div class="stat" data-stat="cp" title="Процедура"><span class="stat-key">ПР</span><span class="stat-val" id="st-cp">2</span></div>
+      <button class="icon-btn" id="btn-evidence" title="Улики (E)">🗂</button>
+      <button class="icon-btn" id="btn-menu" title="Меню (Esc)">≡</button>
+    </div>
+  </header>
+
+  <!-- Плашка реплики спикера -->
+  <div id="speaker-tag" class="speaker-tag hidden"></div>
+
+  <!-- Диалоговое окно -->
+  <div id="dialogue" class="dialogue">
+    <div class="dialogue-inner">
+      <div class="dialogue-name" id="dlg-name"></div>
+      <div class="dialogue-text" id="dlg-text"></div>
+      <div class="dialogue-controls">
+        <button id="btn-skip" class="mini-btn" title="Пропустить печать (Space/Enter)">▶▶</button>
+        <button id="btn-auto" class="mini-btn" title="Авто-прокрутка">A</button>
+        <button id="btn-log" class="mini-btn" title="Журнал сцены">☰</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Варианты выбора -->
+  <div id="choices" class="choices hidden"></div>
+
+  <!-- Всплывающее уведомление об улике -->
+  <div id="toast" class="toast hidden"></div>
+
+  <!-- Оверлей: досье улик -->
+  <div id="modal-evidence" class="modal hidden">
+    <div class="modal-box">
+      <div class="modal-head">
+        <h3>Досье · улики</h3>
+        <button class="modal-close" data-close="modal-evidence">✕</button>
+      </div>
+      <div class="modal-body" id="evidence-list"></div>
+      <div class="modal-foot dim">
+        Ключевые флаги: ЧАСЫ · СЛЕДЫ · КОШЕЛЁК · КАТЯ · ТАБЕЛЬ · ЛИДА · СЕЙФ
+      </div>
+    </div>
+  </div>
+
+  <!-- Оверлей: журнал -->
+  <div id="modal-log" class="modal hidden">
+    <div class="modal-box">
+      <div class="modal-head">
+        <h3>Журнал сцены</h3>
+        <button class="modal-close" data-close="modal-log">✕</button>
+      </div>
+      <div class="modal-body" id="log-list"></div>
+    </div>
+  </div>
+
+  <!-- Оверлей: меню -->
+  <div id="modal-menu" class="modal hidden">
+    <div class="modal-box narrow">
+      <div class="modal-head"><h3>Меню</h3><button class="modal-close" data-close="modal-menu">✕</button></div>
+      <div class="menu-list">
+        <button class="btn" id="mm-continue">Продолжить</button>
+        <button class="btn" id="mm-restart-scene">Начать сцену заново</button>
+        <button class="btn" id="mm-restart-game">Новая игра</button>
+        <div class="menu-row">
+          <label>Скорость текста</label>
+          <input type="range" id="mm-speed" min="1" max="5" step="1" value="3">
+        </div>
+        <div class="menu-row">
+          <label>Звук</label>
+          <button class="btn mini" id="mm-sound">вкл</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Экран финала -->
+  <div id="screen-ending" class="screen ending-screen">
+    <div class="ending-inner">
+      <div class="ending-kicker" id="ending-kicker">РАПОРТ · финал</div>
+      <h2 class="ending-title" id="ending-title">—</h2>
+      <div class="ending-art" id="ending-art"></div>
+      <div class="ending-text" id="ending-text"></div>
+      <div class="ending-stats" id="ending-stats"></div>
+      <div class="ending-actions">
+        <button class="btn btn-primary" id="btn-again">Сыграть заново</button>
+        <button class="btn" id="btn-other-endings">Другие финалы</button>
+      </div>
+      <div class="ending-gallery-hint dim" id="endings-found"></div>
+    </div>
+  </div>
+</div>
+
+<script src="assets/js/story.js"></script>
+<script src="assets/js/art.js"></script>
+<script src="assets/js/engine.js"></script>
+</body>
+</html>
