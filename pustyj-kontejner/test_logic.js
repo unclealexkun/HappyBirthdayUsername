@@ -18,7 +18,7 @@ globalThis.__setS=x=>{S=x}; globalThis.__getS=()=>S; // мост к let S из �
 
 let fails=0;
 function run(picks,label){
-  __setS(newState()); S=__getS(); updateClock();
+  __setS(newState()); S=__getS(); S.sceneId=S.startScene; updateClock();
   let guard=0;
   while(guard++<120){
     const S=__getS(); const sc=SCENES[S.sceneId];

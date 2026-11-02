@@ -41,7 +41,7 @@ s1: {
   ],
   choices: [
     { text: 'Осмотреть тело самому', tag: 'наблюдательность', cost: '−1 час',
-      goto: 's1_body', do: S => { spendHour(S); bumpStat('ob',1); } },
+      goto: 's1_body', do: S => { spendHour(S); bumpStat('ob',1); if(!S.scene2Used) S.scene2Used={}; S.scene2Used.body=true; } },
     { text: 'Спросить Сашу — что видит криминалист', tag: 'эмпатия',
       goto: 's1_sasha', do: S => { trust(S, 'sasha', 1); bumpStat('em',1); } },
     { text: 'Согласиться с Кравцовым: «Работа есть работа»', tag: 'процедура',
@@ -104,7 +104,10 @@ s2_body: {
     { narr: true, t: 'Между двумя отметками — два часа, которых в картине «грабежа глубокой ночью» просто нет. Тело перемещали.' },
   ],
   fxOnEnter: S => { addEvidence(S, 'E_ЧАСЫ'); },
-  choices: [{ text: 'Вернуться к объектам', goto: 's2_back' }],
+  choices: [
+    { text: 'Вернуться к объектам', goto: 's2_back' },
+    { text: 'Сложить улики в опись и выйти из склада', show: S => (S.scene2Count||0)>=1, goto: 's3' },
+  ],
 },
 
 s2_floor: {
@@ -115,7 +118,10 @@ s2_floor: {
     { sp: 'voronov', t: '(Тело тащили сюда — из того самого кабинета. Кто там сидит ночами? Начальник охраны Тарасов.)', narr: true },
   ],
   fxOnEnter: S => { addEvidence(S, 'E_СЛЕДЫ'); bumpStat('ob',1); },
-  choices: [{ text: 'Вернуться к объектам', goto: 's2_back' }],
+  choices: [
+    { text: 'Вернуться к объектам', goto: 's2_back' },
+    { text: 'Сложить улики в опись и выйти из склада', show: S => (S.scene2Count||0)>=1, goto: 's3' },
+  ],
 },
 
 s2_locker: {
@@ -129,7 +135,8 @@ s2_locker: {
   choices: [
     { text: 'Забрать бумажник и идти допрашивать Руслана сейчас', tag: 'быстрый путь',
       goto: 's2_press', do: S => { S.flags.ruslam_pressed_early = true; } },
-    { text: 'Зафиксировать находку в протоколе и вернуться к объектам', goto: 's2_back' },
+    { text: 'Зафиксировать находку в протоколе и вернуться к объектам', show: S => (S.scene2Count||0)<2, goto: 's2_back' },
+    { text: 'Сложить улики в опись и выйти из склада', show: S => (S.scene2Count||0)>=1, goto: 's3' },
   ],
 },
 
@@ -142,7 +149,10 @@ s2_press: {
     { sp: 'sasha', t: 'Он же… сухой. Там везде вода, а он сухой. Зачем вам это, товарищ ст. лейтенант?', fx: S => { trust(S, 'sasha', -1); } },
   ],
   fxOnEnter: S => { S.flags.fast_case = true; trust(S, 'krav', 1); },
-  choices: [{ text: 'Вернуться к объектам', goto: 's2_back' }],
+  choices: [
+    { text: 'Вернуться к объектам', show: S => (S.scene2Count||0)<2, goto: 's2_back' },
+    { text: 'Уйти со склада — пусть Кравцов дописывает сам', goto: 's3' },
+  ],
 },
 
 s2_back: {
